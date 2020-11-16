@@ -13,8 +13,8 @@ public class CombatManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        playerCoroutine = StartCoroutine(BeginCombat(player, enemy));
-        enemyCoroutine = StartCoroutine(BeginCombat(enemy, player));
+        //playerCoroutine = StartCoroutine(BeginCombat(player, enemy));
+        //enemyCoroutine = StartCoroutine(BeginCombat(enemy, player));
     }
 
     // Update is called once per frame

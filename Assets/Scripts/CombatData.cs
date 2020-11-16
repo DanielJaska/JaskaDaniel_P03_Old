@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CombatData : MonoBehaviour
+public class CombatData
 {
     [SerializeField] string _entityName;
     public string getEntityName { get { return _entityName; } }
