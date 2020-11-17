@@ -1,132 +1,112 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-//using UnityEngine.UI;
+using UnityEngine.AI;
 
 public class Enemy : Entity
 {
-    public float range;
-    public EnemyData enemyData;
+    [SerializeField] float range;
 
     [SerializeField] GameObject hpBar;
     [SerializeField] Animator anim;
 
     [SerializeField] DamageText damageText;
-
-    private PlayerInput aggroTarget;
+    
 
     public enum EnemyState
     {
-        Idle = 1,
-        Attacking = 2,
-        Moving = 3,
-        Dead = 4,
-        TookDamage = 5,
+        Idle,
+        Attacking,
     }
 
-    private string animVariableName = "AnimationState";
+    private NavMeshAgent navAgent;
 
     public EnemyState enemyState = EnemyState.Idle;
 
-    Coroutine coroutine = null;
+    //Coroutine coroutine = null;
+
+    private void Start()
+    {
+        navAgent = GetComponent<NavMeshAgent>();
+    }
 
     private void Update()
     {
-        
-        if(anim.GetCurrentAnimatorStateInfo(0).normalizedTime > 1 && !anim.IsInTransition(0))
+        if(attackTarget != null && Vector3.Distance(transform.position, attackTarget.transform.position) >= range && combatData.getCurrentHp > 0)
         {
-            if (enemyState == EnemyState.Idle)
-            {
-                anim.Play("Base Layer.Idle");
-            } else if (enemyState == EnemyState.Attacking)
-            {
-                if(aggroTarget == null)
-                {
-                    enemyState = EnemyState.Idle;
-                }
-                anim.Play("Base Layer.Attack");
-                
-                if(coroutine == null)
-                {
-                    coroutine = StartCoroutine(Attacking());
-                }
-                
-            }
-            else if (enemyState == EnemyState.Dead)
-            {
-                Destroy(gameObject);
-            }
-            
+            anim.Play("Base Layer.Walk");
+
+            Vector3 dir = (attackTarget.transform.position - navAgent.transform.position).normalized;
+            navAgent.transform.LookAt(attackTarget.transform);
+            Vector3 targetDestination = attackTarget.transform.position - (dir * range);
+
+            navAgent.destination = targetDestination;
         }
     }
 
-    IEnumerator Attacking()
-    {
-        if(anim.GetCurrentAnimatorStateInfo(0).normalizedTime > 1)
-        {
-            yield return new WaitForSeconds(anim.GetCurrentAnimatorClipInfo(0)[0].clip.length);
-            float hitChance = enemyData.getAttackValue / aggroTarget.playerData.getDefenseValue;
+    //IEnumerator Attacking()
+    //{
+    // if(anim.GetCurrentAnimatorStateInfo(0).normalizedTime > 1)
+    //{
+    //yield return new WaitForSeconds(anim.GetCurrentAnimatorClipInfo(0)[0].clip.length);
+    //float hitChance = enemyData.getAttackValue / aggroTarget.playerData.getDefenseValue;
 
-            if (hitChance > .9f)
+    //if (hitChance > .9f)
+    //{
+    //    hitChance = .9f;
+    //}
+    //else if (hitChance < .05f)
+    //{
+    //    hitChance = .05f;
+    //}
+    //float rand = Random.Range(0f, 1f);
+    //if (hitChance > rand)
+    //{
+    //    int damageToDeal = Random.Range(enemyData.getMinDamageValue, enemyData.getMaxDamageValue + 1);
+    //    aggroTarget.TakeDamage(damageToDeal);
+    //}
+    //else
+    //{
+    //    aggroTarget.TakeDamage(-1);
+    //}
+    // }
+
+    // aggroTarget.TakeDamage(1);
+    //}
+
+    public override void TakeDamage(int damageDelt, Entity player)
+    {
+        if(combatData.getCurrentHp > 0)
+        {
+            combatData.TakeDamage(damageDelt);
+
+            DamageText temp = Instantiate(damageText, transform);
+
+            if (damageDelt > 0)
             {
-                hitChance = .9f;
-            }
-            else if (hitChance < .05f)
-            {
-                hitChance = .05f;
-            }
-            float rand = Random.Range(0f, 1f);
-            if (hitChance > rand)
-            {
-                int damageToDeal = Random.Range(enemyData.getMinDamageValue, enemyData.getMaxDamageValue + 1);
-                aggroTarget.TakeDamage(damageToDeal);
+                temp.UpdateText(damageDelt.ToString());
+                hpBar.transform.localScale = new Vector3((float)((float)combatData.getCurrentHp / (float)combatData.getMaxHp), 1, 1);
+                anim.Play("Base Layer.Damage");
+                //anim.Play("Base Layer.Attack");
             }
             else
             {
-                aggroTarget.TakeDamage(-1);
+                temp.UpdateText("Miss");
             }
-        }
-        
-       // aggroTarget.TakeDamage(1);
-    }
 
-    private void Idle()
-    {
-        //anim.SetFloat(animVariableName, (int)EnemyState.Idle);
-    }
+            if (combatData.getCurrentHp <= 0)
+            {
+                anim.Play("Base Layer.Death");
+                Destroy(gameObject, 2.05f);
+            }
 
-    public override void LeftClick()
-    {
-    }
-
-    public void TakeDamage(int damageDelt, PlayerInput player)
-    {
-        enemyData.TakeDamage(damageDelt);
-        DamageText temp = Instantiate(damageText, transform);
-        if(damageDelt > 0)
-        {
-            temp.UpdateText(damageDelt.ToString());
-            hpBar.transform.localScale = new Vector3((float)((float)enemyData.getCurrentHp / (float)enemyData.getMaxHp), 1, 1);
-            //anim.SetFloat(animVariableName, (int)EnemyState.TookDamage);
-            anim.Play("Base Layer.Damage");
-        }
-        else
-        {
-            temp.UpdateText("Miss");
-        }
-        
-        //anim.Play("Base Layer.BlendTree.Damage");
-        if (enemyData.getCurrentHp <= 0)
-        {
-            //anim.SetFloat(animVariableName, (int)EnemyState.Dead);
-            anim.Play("Base Layer.Death");
-            enemyState = EnemyState.Dead;
-        }
-
-        if(aggroTarget == null)
-        {
-            aggroTarget = player;
-            enemyState = EnemyState.Attacking;
+            if (attackTarget == null)
+            {
+                attackTarget = player;
+                enemyState = EnemyState.Attacking;
+                anim.SetInteger("CombatState", 1);
+                anim.Play("Base Layer.Attack");
+            }
         }
         
     }
