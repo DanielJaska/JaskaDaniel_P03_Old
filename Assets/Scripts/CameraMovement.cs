@@ -8,37 +8,44 @@ public class CameraMovement : MonoBehaviour
     public float distance = 2.0f;
     private Vector3 direction;
 
+    //camera scroll
+    float cameraDistanceMax = 20f;
+    float cameraDistanceMin = 5f;
+    float cameraDistance = 10f;
+    float scrollSpeed = 0.5f;
+
     private Vector3 offset;
     // Start is called before the first frame update
     void Awake()
     {
+        offset = transform.position - target.position;
         direction = transform.position - target.position;  
     }
 
     // Update is called once per frame
     void LateUpdate()
     {
-        transform.position = target.position + distance * direction.normalized;
-        //transform.position.Set(transform.position.x, Mathf.Clamp(transform.position.y, 2.5f, 10f), transform.position.y);
         transform.LookAt(target);
         if (target)
         {
             if (Input.GetMouseButton(2))
             {
-                direction += new Vector3(-Input.GetAxis("Mouse X"), -Input.GetAxis("Mouse Y"), 0);
-                //if (transform.position.y < 2.5)
-                //{
-                //    transform.position.Set(transform.eulerAngles.x, 2.5f, transform.eulerAngles.z);
-                //}
+                Quaternion camTurnAngle = Quaternion.AngleAxis(Input.GetAxis("Mouse X")  * 10, Vector3.up);
+                Quaternion yTurnAngle = Quaternion.AngleAxis(Input.GetAxis("Mouse Y") * 10, Vector3.left);
+
+                
+
+                offset = (yTurnAngle * camTurnAngle) * offset;
             }
         }
+        Vector3 newPos = target.transform.position + offset;
+        transform.position = Vector3.Slerp(transform.position, newPos, .1f);
     }
 
     private void Update()
     {
-        if(Input.GetMouseButton(2))
-        {
-            //offset += Input.GetAxis("Horizontal") * Input.GetAxis("Vertical");
-        }
+        cameraDistance += Input.GetAxis("Mouse ScrollWheel") * scrollSpeed;
+        cameraDistance = Mathf.Clamp(cameraDistance, cameraDistanceMin, cameraDistanceMax);
+        
     }
 }

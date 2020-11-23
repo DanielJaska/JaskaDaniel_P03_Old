@@ -8,6 +8,10 @@ public class Entity : MonoBehaviour
 
     public CombatData combatData;
 
+    [SerializeField] AudioSource audioSource;
+    [SerializeField] AudioClip attackHitAudio;
+    [SerializeField] AudioClip attackMissAudio;
+
     public void Attack(Entity attacker, Entity defender)
     {
         float hitChance = attacker.combatData.getAttackValue / defender.combatData.getDefenseValue;
@@ -27,10 +31,13 @@ public class Entity : MonoBehaviour
         {
             int damageToDeal = Random.Range(attacker.combatData.getMinDamageValue, attacker.combatData.getMaxDamageValue + 1);
             defender.TakeDamage(damageToDeal, attacker); // for main class
+
+            audioSource.PlayOneShot(attackHitAudio);
         }
         else
         {
             defender.TakeDamage(-1, attacker);// for main class
+            audioSource.PlayOneShot(attackMissAudio);
         }
 
         if (defender.combatData.getCurrentHp <= 0)

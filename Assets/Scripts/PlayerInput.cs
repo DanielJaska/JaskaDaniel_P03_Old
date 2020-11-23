@@ -25,8 +25,7 @@ public class PlayerInput : Entity
     [SerializeField] DamageText damageText;
 
     [SerializeField] float attackRange;
-
-    public bool canAttack = false;
+    
 
     // Start is called before the first frame update
     void Start()
@@ -44,43 +43,21 @@ public class PlayerInput : Entity
             
         }
 
-        if(Input.GetKeyDown(KeyCode.Q))
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            Application.Quit();
+        }
+
+        if (Input.GetKeyDown(KeyCode.Q))
         {
             anim.Play("Base Layer.standing_melee_attack_360_high");
             //attackTarget.TakeDamage(50, this);
             
         }
 
-        //if (anim.GetCurrentAnimatorStateInfo(0).normalizedTime > 1 && !anim.IsInTransition(0))
-        //{
-        //    if (playerState == PlayerState.Idle)
-        //    {
-        //        anim.Play("Base Layer.unarmed_idle");
-        //    }
-        //    else if(playerState == PlayerState.Attacking)
-        //    {
-        //        anim.Play("Base Layer.standing_melee_attack_horizontal");
-        //    }
-        //    else if (playerState == PlayerState.Dead)
-        //    {
-        //        Destroy(gameObject);
-        //    }
-
-        //}
-
-       //if (navAgent.velocity.magnitude != 0)
-       // {
-        //    anim.Play("Base Layer.unarmed_run_forward_inPlace");
-            //stop walking
-        //} else 
         if(navAgent.remainingDistance <= navAgent.stoppingDistance && playerState == PlayerState.Idle)
         {
             anim.SetBool("isWalking", false);
-            anim.Play("Base Layer.unarmed_idle");
-            //if (attackTarget != null)
-            //{
-            //    StartCoroutine(Attack());
-            //}
         } else if(playerState == PlayerState.Attacking && navAgent.remainingDistance <= navAgent.stoppingDistance)
         {
             anim.Play("Base Layer.standing_melee_attack_horizontal");
@@ -91,6 +68,7 @@ public class PlayerInput : Entity
         {
             playerState = PlayerState.Idle;
             anim.SetInteger("CombatState", 0);
+            anim.Play("Base Layer.unarmed_idle");
         }
     }
 
@@ -111,7 +89,7 @@ public class PlayerInput : Entity
             else
             {
                 attackTarget = null;
-                //anim.SetInteger("CombatState", 0);
+                anim.SetInteger("CombatState", 0);
                 playerState = PlayerState.Idle;
                 targetDestination = hit.point;
             }

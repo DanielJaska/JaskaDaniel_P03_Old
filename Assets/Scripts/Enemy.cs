@@ -44,36 +44,6 @@ public class Enemy : Entity
         }
     }
 
-    //IEnumerator Attacking()
-    //{
-    // if(anim.GetCurrentAnimatorStateInfo(0).normalizedTime > 1)
-    //{
-    //yield return new WaitForSeconds(anim.GetCurrentAnimatorClipInfo(0)[0].clip.length);
-    //float hitChance = enemyData.getAttackValue / aggroTarget.playerData.getDefenseValue;
-
-    //if (hitChance > .9f)
-    //{
-    //    hitChance = .9f;
-    //}
-    //else if (hitChance < .05f)
-    //{
-    //    hitChance = .05f;
-    //}
-    //float rand = Random.Range(0f, 1f);
-    //if (hitChance > rand)
-    //{
-    //    int damageToDeal = Random.Range(enemyData.getMinDamageValue, enemyData.getMaxDamageValue + 1);
-    //    aggroTarget.TakeDamage(damageToDeal);
-    //}
-    //else
-    //{
-    //    aggroTarget.TakeDamage(-1);
-    //}
-    // }
-
-    // aggroTarget.TakeDamage(1);
-    //}
-
     public override void TakeDamage(int damageDelt, Entity player)
     {
         if(combatData.getCurrentHp > 0)
